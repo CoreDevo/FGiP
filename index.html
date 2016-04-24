@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #map {
+            height: 100%;
+            width: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var trap = "http://i.imgur.com/HzPa48c.png";
+
+    function initMap() {
+        var mapDiv = document.getElementById('map');
+        var map = new google.maps.Map(mapDiv, {
+            center: {lat: 43.6532, lng: -79.3832},
+            zoom: 8
+        });
+        update(function(data){
+            var newData = JSON.parse(data)['data'];
+            for (var index in newData) {
+                var axis = new google.maps.LatLng(newData[index]['latitude'], newData[index]['longitude']);
+                var id = newData[index]['_id'];
+                addMarker(axis, id, map);
+            }
+        });
+    }
+
+    function update(callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "queryLocation");
+        var data;
+        xhr.onload = function() {
+            data = xhr.response;
+            callback(data);
+        }
+        xhr.send();
+    }
+
+    function addMarker(axis, title, map){
+        var contentString =  "<h3>ID : " + title + "</h3>"
+        var marker = new google.maps.Marker({
+            position: axis,
+            title: title,
+            icon: trap
+        });
+        var infowindow = new google.maps.InfoWindow({
+            content: contentString
+        });
+        marker.addListener('click', function() {
+            infowindow.open(map, marker);
+        });
+        marker.setMap(map);
+    }
+
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?callback=initMap"
+        async defer></script>
+</body>
+</html>
